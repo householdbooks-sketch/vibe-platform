@@ -25,9 +25,9 @@ export function WorkspaceHeader({
   
   const getStatusColor = () => {
     switch (status) {
-      case 'generating': return 'text-emerald-400';
+      case 'generating': return 'text-accent-cyan';
       case 'error': return 'text-red-400';
-      default: return 'text-slate-400';
+      default: return 'text-secondary';
     }
   };
 
@@ -40,16 +40,18 @@ export function WorkspaceHeader({
   };
 
   return (
-    <header className="h-14 bg-[#0B0F19] border-b border-slate-800 flex items-center justify-between px-6">
+    <header className="h-14 bg-[#0F0A17] border-b border-brand flex items-center justify-between px-6">
       <div className="flex items-center gap-4">
-        <h1 className="text-xl font-semibold text-slate-100">Vibe Platform</h1>
+        <h1 className="text-xl font-semibold font-space-grotesk text-gradient-brand">
+          Speak Life Learn
+        </h1>
         
         {/* Model Selector Badge */}
         <div className="relative">
           <select
             value={selectedModel}
             onChange={(e) => onModelChange(e.target.value)}
-            className="appearance-none bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer hover:bg-slate-800/70 transition-colors"
+            className="appearance-none bg-[#392A48]/50 border border-brand-secondary rounded-lg px-3 py-1.5 text-sm text-primary focus:outline-none focus:ring-2 focus:ring-[var(--accent-cyan)] focus:border-transparent cursor-pointer hover:bg-[#392A48]/70 transition-colors"
           >
             {MODELS.map((model) => (
               <option key={model.id} value={model.id}>
@@ -57,14 +59,14 @@ export function WorkspaceHeader({
               </option>
             ))}
           </select>
-          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-400">
+          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-secondary">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
           </div>
         </div>
 
-        <div className="text-xs text-slate-400">
+        <div className="text-xs text-secondary font-space-grotesk">
           {selectedModelInfo.provider}
         </div>
       </div>
@@ -72,17 +74,26 @@ export function WorkspaceHeader({
       {/* Status & Token Indicator */}
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
-          <div className={`w-2 h-2 rounded-full ${status === 'generating' ? 'animate-pulse bg-emerald-400' : status === 'error' ? 'bg-red-400' : 'bg-slate-500'}`} />
-          <span className={`text-sm ${getStatusColor()}`}>
+          <div className={`w-2 h-2 rounded-full ${status === 'generating' ? 'animate-pulse bg-accent-cyan' : status === 'error' ? 'bg-red-400' : 'bg-[#6B6285]'}`} />
+          <span className={`text-sm font-space-grotesk ${getStatusColor()}`}>
             {getStatusText()}
           </span>
         </div>
         
-        <div className="text-sm text-slate-400">
-          <span className="text-slate-300">{tokensUsed.toLocaleString()}</span>
-          <span className="mx-1">/</span>
-          <span>{maxTokens.toLocaleString()}</span>
-          <span className="ml-1">tokens</span>
+        {/* Token Bar with Brand Gradient */}
+        <div className="flex items-center gap-3">
+          <div className="flex flex-col items-end">
+            <div className="text-sm text-primary font-space-mono font-medium">
+              {tokensUsed.toLocaleString()} / {maxTokens.toLocaleString()}
+            </div>
+            <div className="text-xs text-secondary">tokens</div>
+          </div>
+          <div className="w-24 h-2 bg-[#2D223C] rounded-full overflow-hidden">
+            <div 
+              className="h-full bg-brand rounded-full transition-all duration-300"
+              style={{ width: `${Math.min((tokensUsed / maxTokens) * 100, 100)}%` }}
+            />
+          </div>
         </div>
       </div>
     </header>

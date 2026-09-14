@@ -1,38 +1,73 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 @import "tailwindcss";
 
 :root {
-  /* Deep Slate Aesthetic Color Scheme */
-  --background: #0B0F19;
-  --foreground: #f1f5f9;
-  --slate-50: #f8fafc;
-  --slate-100: #f1f5f9;
-  --slate-200: #e2e8f0;
-  --slate-300: #cbd5e1;
-  --slate-400: #94a3b8;
-  --slate-500: #64748b;
-  --slate-600: #475569;
-  --slate-700: #334155;
-  --slate-800: #1e293b;
-  --slate-900: #0f172a;
-  --slate-950: #020617;
+  /* Speak Life Learn Brand Identity Color Palette */
+  
+  /* Primary Dark Canvas */
+  --background: #0F0A17;
+  --background-alt: #130D1E;
+  --foreground: #F8FAFC;
+  
+  /* Brand Accent Gradient Colors */
+  --brand-purple-start: #8B5CF6;
+  --brand-purple-mid: #9333EA;
+  --brand-purple-end: #A855F7;
+  --brand-cyan-start: #00C9FF;
+  --brand-cyan-mid: #38BDF8;
+  --brand-cyan-end: #0EA5E9;
+  
+  /* Primary Accents */
+  --accent-cyan: #00C9FF;
+  --accent-purple: #A855F7;
+  
+  /* Accent Dark/Secondary */
+  --accent-dark: #392A48;
+  
+  /* Borders */
+  --border-primary: #2D223C;
+  --border-secondary: #392A48;
+  
+  /* Text Colors */
+  --text-primary: #F8FAFC;
+  --text-secondary: #948FA8;
+  --text-muted: #6B6285;
+  
+  /* Gradients */
+  --gradient-brand: linear-gradient(135deg, var(--brand-purple-start) 0%, var(--brand-purple-mid) 25%, var(--brand-cyan-mid) 75%, var(--brand-cyan-start) 100%);
+  --gradient-brand-reverse: linear-gradient(135deg, var(--brand-cyan-start) 0%, var(--brand-cyan-mid) 25%, var(--brand-purple-mid) 75%, var(--brand-purple-start) 100%);
+  --gradient-brand-subtle: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(0, 201, 255, 0.1) 100%);
+  
+  /* Legacy slate variables for compatibility */
+  --slate-50: #F8FAFC;
+  --slate-100: #F1F5F9;
+  --slate-200: #E2E8F0;
+  --slate-300: #CBD5E1;
+  --slate-400: #948FA8;
+  --slate-500: #6B6285;
+  --slate-600: #54516A;
+  --slate-700: #392A48;
+  --slate-800: #2D223C;
+  --slate-900: #130D1E;
+  --slate-950: #0F0A17;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+  --font-sans: "Space Grotesk", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  --font-mono: "Space Mono", ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0B0F19;
-    --foreground: #f1f5f9;
+    --background: #0F0A17;
+    --foreground: #F8FAFC;
   }
 }
 
 * {
-  border-color: var(--slate-800);
+  border-color: var(--border-primary);
 }
 
 body {
@@ -44,34 +79,34 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Custom Scrollbars for Deep Slate Theme */
+/* Custom Scrollbars for Speak Life Learn Theme */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--slate-900);
+  background: var(--background);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--slate-700);
+  background: var(--accent-dark);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--slate-600);
+  background: var(--border-secondary);
 }
 
 /* Selection Styling */
 ::selection {
-  background: rgba(59, 130, 246, 0.3);
-  color: var(--slate-100);
+  background: rgba(168, 85, 247, 0.3);
+  color: var(--text-primary);
 }
 
-/* Focus Rings with Deep Slate Theme */
+/* Focus Rings with Speak Life Learn Brand Theme */
 *:focus-visible {
-  outline: 2px solid #3b82f6;
+  outline: 2px solid var(--accent-cyan);
   outline-offset: 2px;
 }
 
@@ -90,38 +125,88 @@ button {
   font-family: inherit;
 }
 
-/* Input Reset with Deep Slate Styling */
+/* Input Reset with Speak Life Learn Brand Styling */
 input, textarea, select {
   font-family: inherit;
-  background: var(--slate-800);
-  color: var(--slate-100);
-  border: 1px solid var(--slate-700);
+  background: var(--accent-dark);
+  color: var(--text-primary);
+  border: 1px solid var(--border-secondary);
 }
 
 input:focus, textarea:focus, select:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 0 3px rgba(0, 201, 255, 0.1);
 }
 
-/* Deep Slate Utility Classes */
-.bg-deep-slate {
-  background-color: var(--background);
+/* Speak Life Learn Brand Utility Classes */
+.bg-brand {
+  background: var(--gradient-brand);
 }
 
-.text-slate-primary {
-  color: var(--slate-100);
+.bg-brand-reverse {
+  background: var(--gradient-brand-reverse);
 }
 
-.text-slate-secondary {
-  color: var(--slate-400);
+.bg-brand-subtle {
+  background: var(--gradient-brand-subtle);
 }
 
-.border-slate {
-  border-color: var(--slate-800);
+.text-gradient-brand {
+  background: var(--gradient-brand);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
 }
 
-.border-slate-light {
-  border-color: var(--slate-700);
+.text-gradient-brand-reverse {
+  background: var(--gradient-brand-reverse);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.bg-accent-cyan {
+  background-color: var(--accent-cyan);
+}
+
+.bg-accent-purple {
+  background-color: var(--accent-purple);
+}
+
+.text-accent-cyan {
+  color: var(--accent-cyan);
+}
+
+.text-accent-purple {
+  color: var(--accent-purple);
+}
+
+.text-primary {
+  color: var(--text-primary);
+}
+
+.text-secondary {
+  color: var(--text-secondary);
+}
+
+.text-muted {
+  color: var(--text-muted);
+}
+
+.border-brand {
+  border-color: var(--border-primary);
+}
+
+.border-brand-secondary {
+  border-color: var(--border-secondary);
+}
+
+.font-space-grotesk {
+  font-family: "Space Grotesk", var(--font-sans);
+}
+
+.font-space-mono {
+  font-family: "Space Mono", var(--font-mono);
 }
 
 /* Animation Utilities */

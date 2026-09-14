@@ -90,22 +90,22 @@ export function LivePreview({ htmlContent, isLoading = false }: LivePreviewProps
 </html>`;
 
   return (
-    <div className="flex flex-col h-full bg-[#0B0F19]">
+    <div className="flex flex-col h-full bg-[#0F0A17]">
       {/* Header with Viewport Controls */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-brand">
         <div className="flex items-center gap-4">
-          <h3 className="text-lg font-semibold text-slate-100">Live Preview</h3>
+          <h3 className="text-lg font-semibold font-space-grotesk text-primary">Live Preview</h3>
           
           {/* Viewport Selector */}
-          <div className="flex items-center gap-1 bg-slate-800/50 rounded-lg p-1">
+          <div className="flex items-center gap-1 bg-[#392A48]/50 rounded-lg p-1">
             {(Object.keys(VIEWPORT_SIZES) as ViewportSize[]).map((size) => (
               <button
                 key={size}
                 onClick={() => setViewport(size)}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors ${
+                className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors font-space-grotesk ${
                   viewport === size
-                    ? 'bg-blue-600 text-white'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700'
+                    ? 'bg-brand text-white shadow-lg'
+                    : 'text-secondary hover:text-accent-cyan hover:bg-[#392A48]/70'
                 }`}
               >
                 <span className="text-xs">{VIEWPORT_SIZES[size].icon}</span>
@@ -118,7 +118,7 @@ export function LivePreview({ htmlContent, isLoading = false }: LivePreviewProps
         {/* Controls */}
         <div className="flex items-center gap-2">
           {viewport !== 'desktop' && (
-            <div className="text-sm text-slate-400">
+            <div className="text-sm text-secondary font-space-mono">
               {viewportConfig.width} × {viewportConfig.height}
             </div>
           )}
@@ -126,7 +126,7 @@ export function LivePreview({ htmlContent, isLoading = false }: LivePreviewProps
           <button
             onClick={handleRefresh}
             disabled={isRefreshing}
-            className="flex items-center gap-2 px-3 py-1.5 text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 px-3 py-1.5 text-sm text-secondary hover:text-accent-cyan hover:bg-[#392A48] rounded transition-colors disabled:opacity-50 font-space-grotesk"
           >
             <svg 
               className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} 
@@ -146,8 +146,8 @@ export function LivePreview({ htmlContent, isLoading = false }: LivePreviewProps
         <div className="h-full flex items-center justify-center p-4">
           {isLoading ? (
             <div className="flex flex-col items-center gap-4">
-              <div className="w-8 h-8 border-2 border-blue-600/20 border-t-blue-600 rounded-full animate-spin" />
-              <p className="text-slate-600">Loading preview...</p>
+              <div className="w-8 h-8 border-2 border-[var(--accent-cyan)]/20 border-t-[var(--accent-cyan)] rounded-full animate-spin" />
+              <p className="text-slate-600 font-space-grotesk">Loading preview...</p>
             </div>
           ) : (
             <div 
@@ -160,15 +160,15 @@ export function LivePreview({ htmlContent, isLoading = false }: LivePreviewProps
                 borderRadius: viewport !== 'desktop' ? '12px' : '8px',
               }}
             >
-              {/* Device Frame for Mobile/Tablet */}
+              {/* Device Frame for Mobile/Tablet with Brand Colors */}
               {viewport !== 'desktop' && (
                 <>
-                  {/* Top bezel */}
-                  <div className="absolute top-0 left-0 right-0 h-6 bg-slate-800 rounded-t-xl flex items-center justify-center">
-                    <div className="w-12 h-1 bg-slate-600 rounded-full" />
+                  {/* Top bezel with gradient accent */}
+                  <div className="absolute top-0 left-0 right-0 h-6 bg-gradient-to-r from-[var(--brand-purple-start)] to-[var(--brand-cyan-start)] rounded-t-xl flex items-center justify-center">
+                    <div className="w-12 h-1 bg-white/30 rounded-full" />
                   </div>
                   {/* Bottom bezel */}
-                  <div className="absolute bottom-0 left-0 right-0 h-6 bg-slate-800 rounded-b-xl" />
+                  <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-r from-[var(--brand-purple-start)] to-[var(--brand-cyan-start)] rounded-b-xl" />
                 </>
               )}
               
@@ -190,7 +190,7 @@ export function LivePreview({ htmlContent, isLoading = false }: LivePreviewProps
               {/* Loading Overlay */}
               {isRefreshing && (
                 <div className="absolute inset-0 bg-white/80 flex items-center justify-center">
-                  <div className="w-6 h-6 border-2 border-blue-600/20 border-t-blue-600 rounded-full animate-spin" />
+                  <div className="w-6 h-6 border-2 border-[var(--accent-cyan)]/20 border-t-[var(--accent-cyan)] rounded-full animate-spin" />
                 </div>
               )}
             </div>
@@ -199,13 +199,13 @@ export function LivePreview({ htmlContent, isLoading = false }: LivePreviewProps
       </div>
 
       {/* Footer Info */}
-      <div className="px-4 py-2 border-t border-slate-800 bg-slate-900/30">
-        <div className="flex items-center justify-between text-xs text-slate-500">
-          <span>
+      <div className="px-4 py-2 border-t border-brand bg-[#130D1E]/50">
+        <div className="flex items-center justify-between text-xs font-space-grotesk">
+          <span className="text-muted">
             {htmlContent ? 'Live preview updating in real-time' : 'Waiting for generated content...'}
           </span>
-          <span className="flex items-center gap-1">
-            <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
+          <span className="flex items-center gap-1 text-secondary">
+            <div className="w-2 h-2 bg-accent-cyan rounded-full animate-pulse" />
             Connected
           </span>
         </div>

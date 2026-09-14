@@ -65,11 +65,11 @@ export function PromptPanel({
   };
 
   return (
-    <div className="flex flex-col h-full bg-[#0B0F19]">
+    <div className="flex flex-col h-full bg-[#0F0A17]">
       {/* Header */}
-      <div className="flex-shrink-0 p-4 border-b border-slate-800">
-        <h2 className="text-lg font-semibold text-slate-100">Prompt & Generation</h2>
-        <p className="text-sm text-slate-400 mt-1">
+      <div className="flex-shrink-0 p-4 border-b border-brand">
+        <h2 className="text-lg font-semibold font-space-grotesk text-primary">Prompt & Generation</h2>
+        <p className="text-sm text-secondary mt-1">
           Describe what you want to build and watch it come to life
         </p>
       </div>
@@ -78,13 +78,13 @@ export function PromptPanel({
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center">
-            <div className="w-16 h-16 bg-slate-800/50 rounded-full flex items-center justify-center mb-4">
-              <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-16 h-16 bg-[#392A48]/50 rounded-full flex items-center justify-center mb-4">
+              <svg className="w-8 h-8 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
               </svg>
             </div>
-            <h3 className="text-slate-300 font-medium mb-2">Start a conversation</h3>
-            <p className="text-slate-400 text-sm max-w-xs">
+            <h3 className="text-primary font-medium font-space-grotesk mb-2">Start a conversation</h3>
+            <p className="text-secondary text-sm max-w-xs">
               Type a prompt to generate code, like &quot;Build a modern SaaS landing page&quot; or &quot;Create a habit tracker card&quot;
             </p>
           </div>
@@ -94,14 +94,14 @@ export function PromptPanel({
               <div key={message.id} className={`flex flex-col gap-2 ${message.type === 'user' ? 'items-end' : 'items-start'}`}>
                 <div className={`max-w-[85%] rounded-lg px-3 py-2 ${
                   message.type === 'user' 
-                    ? 'bg-blue-600 text-white' 
+                    ? 'bg-brand text-white shadow-lg' 
                     : message.type === 'system'
                     ? 'bg-amber-600/20 text-amber-200 border border-amber-600/30'
-                    : 'bg-slate-800 text-slate-200 border border-slate-700'
+                    : 'bg-[#392A48] text-primary border border-brand-secondary'
                 }`}>
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap font-space-grotesk">{message.content}</p>
                 </div>
-                <span className="text-xs text-slate-500">
+                <span className="text-xs text-muted font-space-mono">
                   {formatTime(message.timestamp)}
                 </span>
               </div>
@@ -110,10 +110,10 @@ export function PromptPanel({
             {/* Generation Status */}
             {generationStatus && (
               <div className="flex items-start gap-2">
-                <div className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 max-w-[85%]">
+                <div className="bg-[#392A48] border border-brand-secondary rounded-lg px-3 py-2 max-w-[85%]">
                   <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
-                    <p className="text-sm text-slate-300">{generationStatus}</p>
+                    <div className="w-2 h-2 bg-accent-cyan rounded-full animate-pulse" />
+                    <p className="text-sm text-primary font-space-grotesk">{generationStatus}</p>
                   </div>
                 </div>
               </div>
@@ -124,7 +124,7 @@ export function PromptPanel({
       </div>
 
       {/* Input Area */}
-      <div className="flex-shrink-0 p-4 border-t border-slate-800">
+      <div className="flex-shrink-0 p-4 border-t border-brand">
         <form onSubmit={handleSubmit} className="space-y-3">
           <div className="relative">
             <textarea
@@ -134,19 +134,19 @@ export function PromptPanel({
               onKeyDown={handleKeyDown}
               placeholder="Describe what you want to build..."
               disabled={isGenerating}
-              className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none min-h-[44px] max-h-[120px] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              className="w-full bg-[#392A48]/50 border border-brand-secondary rounded-lg px-4 py-3 text-primary placeholder-secondary focus:outline-none focus:ring-2 focus:ring-[var(--accent-cyan)] focus:border-transparent resize-none min-h-[44px] max-h-[120px] disabled:opacity-50 disabled:cursor-not-allowed transition-all font-space-grotesk"
               rows={1}
             />
           </div>
           
           <div className="flex justify-between items-center">
-            <div className="text-xs text-slate-500">
+            <div className="text-xs text-muted font-space-mono">
               Press Enter to send, Shift+Enter for new line
             </div>
             <button
               type="submit"
               disabled={!inputValue.trim() || isGenerating}
-              className="bg-blue-600 hover:bg-blue-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-medium px-4 py-2 rounded-lg transition-colors flex items-center gap-2 text-sm"
+              className="bg-brand hover:opacity-90 disabled:bg-[#54516A] disabled:cursor-not-allowed text-white font-medium font-space-grotesk px-6 py-2 rounded-lg transition-all duration-200 flex items-center gap-2 text-sm shadow-lg hover:shadow-xl disabled:shadow-none"
             >
               {isGenerating ? (
                 <>
