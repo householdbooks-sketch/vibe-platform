@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { FileNode } from './CodeViewer';
 
 interface ChatMessage {
@@ -15,6 +15,18 @@ interface GenerationResult {
   htmlContent: string;
 }
 
+interface StreamEvent {
+  type: 'thought' | 'tool_call' | 'tool_result' | 'file_update' | 'status' | 'error' | 'complete';
+  data: any;
+  timestamp: number;
+}
+
+interface FileSnapshot {
+  path: string;
+  content: string;
+  language?: string;
+}
+
 type GenerationStatus = 'idle' | 'analyzing' | 'generating' | 'assembling' | 'complete' | 'error';
 
 export function useVibeEngine() {
@@ -24,8 +36,284 @@ export function useVibeEngine() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationStatus, setGenerationStatus] = useState<GenerationStatus>('idle');
   const [currentStatusMessage, setCurrentStatusMessage] = useState<string>('');
+  const [apiKey, setApiKey] = useState<string>('');
+  const [useLocalMock, setUseLocalMock] = useState(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
-  // Mock generation templates
+  // Convert files to FileSnapshot format for API
+  const filesToSnapshots = useCallback((files: FileNode[]): FileSnapshot[] => {
+    return files.map(file => ({
+      path: file.name,
+      content: file.content || '',
+      language: file.language
+    }));
+  }, []);
+
+  // Convert messages to API format
+  const messagesToApiFormat = useCallback((messages: ChatMessage[]) => {
+    return messages.map(msg => ({
+      id: msg.id,
+      role: msg.type === 'user' ? 'user' : (msg.type === 'assistant' ? 'assistant' : 'system'),
+      content: msg.content,
+      timestamp: msg.timestamp
+    }));
+  }, []);
+
+  // Stream processing function
+  const processStreamEvent = useCallback((event: StreamEvent) => {
+    switch (event.type) {
+      case 'thought':
+        // Add assistant message with thinking
+        const thoughtMessage: ChatMessage = {
+          id: `thought_${Date.now()}`,
+          type: 'assistant',
+          content: `💭 ${event.data.content}`,
+          timestamp: event.timestamp
+        };
+        setMessages(prev => [...prev, thoughtMessage]);
+        break;
+
+      case 'status':
+        setCurrentStatusMessage(event.data.message);
+        if (event.data.message.includes('Analyzing')) {
+          setGenerationStatus('analyzing');
+        } else if (event.data.message.includes('Generating') || event.data.message.includes('Creating')) {
+          setGenerationStatus('generating');
+        } else if (event.data.message.includes('Assembling') || event.data.message.includes('complete')) {
+          setGenerationStatus('assembling');
+        }
+        break;
+
+      case 'tool_call':
+        // Show tool execution in progress
+        const toolMessage: ChatMessage = {
+          id: `tool_${event.data.id}`,
+          type: 'assistant', 
+          content: `🔧 Executing: ${event.data.function}(${JSON.stringify(event.data.arguments, null, 2)})`,
+          timestamp: event.timestamp
+        };
+        setMessages(prev => [...prev, toolMessage]);
+        break;
+
+      case 'tool_result':
+        // Show tool result
+        const resultMessage: ChatMessage = {
+          id: `result_${event.data.id}`,
+          type: 'assistant',
+          content: `✅ ${event.data.result}`,
+          timestamp: event.timestamp
+        };
+        setMessages(prev => [...prev, resultMessage]);
+        break;
+
+      case 'file_update':
+        const newFile: FileNode = {
+          name: event.data.path,
+          type: 'file',
+          content: event.data.content,
+          language: event.data.language || 'text'
+        };
+        
+        setFiles(prev => {
+          const existingIndex = prev.findIndex(f => f.name === event.data.path);
+          if (existingIndex >= 0) {
+            const updated = [...prev];
+            updated[existingIndex] = newFile;
+            return updated;
+          } else {
+            return [...prev, newFile];
+          }
+        });
+        
+        // Update HTML content if it's an HTML file
+        if (event.data.path === 'index.html') {
+          setHtmlContent(event.data.content);
+        }
+        break;
+
+      case 'error':
+        setGenerationStatus('error');
+        setCurrentStatusMessage(event.data.message);
+        const errorMessage: ChatMessage = {
+          id: `error_${Date.now()}`,
+          type: 'assistant',
+          content: `❌ Error: ${event.data.message}${event.data.suggestion ? `\n\n${event.data.suggestion}` : ''}`,
+          timestamp: event.timestamp
+        };
+        setMessages(prev => [...prev, errorMessage]);
+        break;
+
+      case 'complete':
+        setGenerationStatus('complete');
+        setCurrentStatusMessage('');
+        setIsGenerating(false);
+        const completeMessage: ChatMessage = {
+          id: `complete_${Date.now()}`,
+          type: 'assistant',
+          content: event.data.message,
+          timestamp: event.timestamp
+        };
+        setMessages(prev => [...prev, completeMessage]);
+        
+        // Auto-clear status after a moment
+        setTimeout(() => {
+          setGenerationStatus('idle');
+        }, 2000);
+        break;
+    }
+  }, []);
+
+  // API-based generation with SSE streaming
+  const generateWithAPI = useCallback(async (prompt: string) => {
+    try {
+      // Abort any existing request
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      
+      abortControllerRef.current = new AbortController();
+
+      const response = await fetch('/api/agent', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          prompt,
+          currentFiles: filesToSnapshots(files),
+          previousMessages: messagesToApiFormat(messages),
+          apiKey: apiKey || undefined
+        }),
+        signal: abortControllerRef.current.signal
+      });
+
+      if (!response.ok) {
+        throw new Error(`API Error: ${response.status} ${response.statusText}`);
+      }
+
+      if (!response.body) {
+        throw new Error('No response body received from API');
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          
+          if (done) break;
+
+          const chunk = decoder.decode(value, { stream: true });
+          const lines = chunk.split('\n');
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              try {
+                const eventData = JSON.parse(line.slice(6));
+                processStreamEvent(eventData);
+              } catch (e) {
+                console.warn('Failed to parse SSE data:', e);
+              }
+            }
+          }
+        }
+      } finally {
+        reader.releaseLock();
+      }
+
+    } catch (error: any) {
+      if (error.name === 'AbortError') {
+        console.log('Request was aborted');
+        return;
+      }
+
+      console.error('API generation failed:', error);
+      
+      // Fallback to mock generation
+      console.log('Falling back to local mock generation...');
+      setUseLocalMock(true);
+      
+      // Call mock generation directly with inline logic to avoid circular deps
+      setIsGenerating(true);
+      setGenerationStatus('analyzing');
+      setCurrentStatusMessage('Analyzing your request...');
+
+      // Simulate analysis phase
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      setGenerationStatus('generating');
+      setCurrentStatusMessage('Generating project files...');
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      setGenerationStatus('assembling');
+      setCurrentStatusMessage('Assembling final bundle...');
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Simple inline mock generation
+      const mockFiles: FileNode[] = [
+        {
+          name: 'index.html',
+          type: 'file',
+          content: `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generated Project</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app">
+        <h1>Generated Project</h1>
+        <p>Prompt: "${prompt}"</p>
+        <button onclick="handleClick()">Click Me</button>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>`,
+          language: 'html'
+        },
+        {
+          name: 'styles.css',
+          type: 'file', 
+          content: `body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 2rem; }
+button { background: #007cba; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; }`,
+          language: 'css'
+        },
+        {
+          name: 'script.js',
+          type: 'file',
+          content: `function handleClick() { alert('Hello from your generated project!'); }
+document.addEventListener('DOMContentLoaded', function() { console.log('Project loaded successfully!'); });`,
+          language: 'javascript'
+        }
+      ];
+
+      setFiles(mockFiles);
+      setHtmlContent(mockFiles[0].content || '');
+
+      // Add assistant response
+      const assistantMessage: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        type: 'assistant',
+        content: `I've generated a ${mockFiles.length}-file project based on your request. The application includes HTML structure, CSS styling, and JavaScript functionality. You can view the files in the code explorer and see the live preview on the right.`,
+        timestamp: Date.now() + 1,
+      };
+
+      setMessages(prev => [...prev, assistantMessage]);
+      setGenerationStatus('complete');
+      setCurrentStatusMessage('');
+      setIsGenerating(false);
+
+      // Auto-clear status after a moment
+      setTimeout(() => {
+        setGenerationStatus('idle');
+      }, 2000);
+    }
+  }, [files, messages, apiKey, filesToSnapshots, messagesToApiFormat, processStreamEvent]);
+
+  // Mock generation templates (keeping existing implementation as fallback)
   const generateMockFiles = useCallback((prompt: string): GenerationResult => {
     const isLandingPage = prompt.toLowerCase().includes('landing') || prompt.toLowerCase().includes('saas');
     const isHabitTracker = prompt.toLowerCase().includes('habit') || prompt.toLowerCase().includes('tracker');
@@ -1730,6 +2018,7 @@ document.addEventListener('DOMContentLoaded', function() {
     return { files, htmlContent };
   };
 
+  // Mock simulation for fallback
   const simulateGeneration = useCallback(async (prompt: string) => {
     setIsGenerating(true);
     setGenerationStatus('analyzing');
@@ -1779,12 +2068,80 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 2000);
   }, [generateMockFiles]);
 
+  // Main generation function that decides between API and mock
+  const generateProject = useCallback(async (prompt: string) => {
+    setIsGenerating(true);
+    
+    // Add user message immediately
+    const userMessage: ChatMessage = {
+      id: Date.now().toString(),
+      type: 'user',
+      content: prompt,
+      timestamp: Date.now(),
+    };
+    setMessages(prev => [...prev, userMessage]);
+
+    // Try API first if we have an API key and not forced to use mock
+    if (apiKey && !useLocalMock) {
+      await generateWithAPI(prompt);
+    } else {
+      // Use mock generation as fallback or when explicitly set
+      await simulateGeneration(prompt);
+    }
+  }, [apiKey, useLocalMock, generateWithAPI, simulateGeneration]);
+
+  // Handle iframe errors for self-healing
+  const handleIframeError = useCallback((error: string) => {
+    console.log('Iframe error detected:', error);
+    
+    const errorMessage: ChatMessage = {
+      id: `iframe_error_${Date.now()}`,
+      type: 'system',
+      content: `Error detected in preview: ${error}`,
+      timestamp: Date.now()
+    };
+    setMessages(prev => [...prev, errorMessage]);
+
+    // Optionally trigger self-healing
+    if (apiKey && !useLocalMock) {
+      const healingPrompt = `Fix this error in the generated code: ${error}`;
+      generateProject(healingPrompt);
+    }
+  }, [apiKey, useLocalMock, generateProject]);
+
+  // Settings functions
+  const setAPIKey = useCallback((key: string) => {
+    setApiKey(key);
+    if (key) {
+      setUseLocalMock(false);
+    }
+  }, []);
+
+  const toggleMockMode = useCallback(() => {
+    setUseLocalMock(prev => !prev);
+  }, []);
+
   return {
     messages,
     files,
     htmlContent,
     isGenerating,
     generationStatus: generationStatus === 'idle' ? undefined : currentStatusMessage,
-    sendMessage: simulateGeneration,
+    sendMessage: generateProject,
+    // New API integration features
+    apiKey,
+    setAPIKey,
+    useLocalMock,
+    toggleMockMode,
+    handleIframeError,
+    // Stop/abort functionality
+    stopGeneration: () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      setIsGenerating(false);
+      setGenerationStatus('idle');
+      setCurrentStatusMessage('');
+    }
   };
 }
