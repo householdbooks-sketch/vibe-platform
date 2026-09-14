@@ -213,8 +213,8 @@ Please build this with clean, production-ready code following modern web develop
       </div>
 
       {/* Input Area */}
-      <div className="flex-shrink-0 p-4 border-t border-brand">
-        <form onSubmit={handleSubmit} className="space-y-3">
+      <div className="flex-shrink-0 px-4 pt-3 pb-6 border-t border-brand bg-[#110B1B]">
+        <form onSubmit={handleSubmit} className="space-y-2.5">
           <div className="relative">
             <textarea
               ref={textareaRef}
@@ -223,48 +223,48 @@ Please build this with clean, production-ready code following modern web develop
               onKeyDown={handleKeyDown}
               placeholder="Describe what you want to build..."
               disabled={isGenerating}
-              className="w-full bg-[#392A48]/50 border border-brand-secondary rounded-lg px-4 py-3 text-primary placeholder-secondary focus:outline-none focus:ring-2 focus:ring-[var(--accent-cyan)] focus:border-transparent resize-none min-h-[44px] max-h-[120px] disabled:opacity-50 disabled:cursor-not-allowed transition-all font-space-grotesk"
-              rows={1}
+              className="w-full bg-[#201433]/70 border border-brand-secondary rounded-xl px-3.5 py-2.5 text-primary placeholder-secondary focus:outline-none focus:ring-2 focus:ring-[var(--accent-cyan)] focus:border-transparent resize-none min-h-[50px] max-h-[120px] disabled:opacity-50 disabled:cursor-not-allowed transition-all font-space-grotesk text-sm"
+              rows={2}
             />
           </div>
           
-          <div className="flex items-center justify-between pt-1">
-            <div className="flex items-center gap-2">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 shrink-0">
               <button
                 type="button"
                 onClick={() => setShowStartersModal(true)}
-                className="flex items-center gap-1.5 px-2.5 py-1 text-xs text-accent-cyan hover:text-cyan-300 bg-[#392A48]/50 hover:bg-[#392A48] border border-brand-secondary rounded-lg transition-colors font-space-grotesk"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-accent-cyan hover:text-cyan-300 bg-[#2D1B44] hover:bg-[#3D255C] border border-purple-800/80 rounded-lg transition-colors font-space-grotesk whitespace-nowrap shrink-0"
                 title="Browse Vibe Starters"
               >
                 <span>🚀</span>
-                Starters
+                <span>Starters</span>
               </button>
               <button
                 type="button"
                 onClick={() => setShowEnhancer(true)}
-                className="flex items-center gap-1.5 px-2.5 py-1 text-xs text-accent-purple hover:text-purple-300 bg-[#392A48]/50 hover:bg-[#392A48] border border-brand-secondary rounded-lg transition-colors font-space-grotesk"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-purple-300 hover:text-white bg-[#2D1B44] hover:bg-[#3D255C] border border-purple-800/80 rounded-lg transition-colors font-space-grotesk whitespace-nowrap shrink-0"
                 title="AI Prompt Wizard"
               >
                 <span>✨</span>
-                Prompt Wizard
+                <span>Prompt Wizard</span>
               </button>
             </div>
             <button
               type="submit"
               disabled={!inputValue.trim() || isGenerating}
-              className="bg-brand hover:opacity-90 disabled:bg-[#54516A] disabled:cursor-not-allowed text-white font-medium font-space-grotesk px-5 py-1.5 rounded-lg transition-all duration-200 flex items-center gap-2 text-xs shadow-lg hover:shadow-xl disabled:shadow-none"
+              className="bg-brand hover:opacity-90 disabled:bg-[#3D255C]/40 disabled:cursor-not-allowed text-white font-semibold font-space-grotesk px-4 py-1.5 rounded-lg transition-all duration-200 flex items-center gap-1.5 text-xs shadow-lg hover:shadow-xl disabled:shadow-none whitespace-nowrap shrink-0"
             >
               {isGenerating ? (
                 <>
                   <div className="w-3.5 h-3.5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                  Generating...
+                  <span>Generating...</span>
                 </>
               ) : (
                 <>
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                   </svg>
-                  Vibe Code
+                  <span>Vibe Code</span>
                 </>
               )}
             </button>

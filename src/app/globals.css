@@ -241,6 +241,16 @@ input:focus, textarea:focus, select:focus {
   }
 }
 
+/* Hide Next.js Dev Indicator in bottom-left corner */
+nextjs-portal,
+[data-nextjs-toast],
+[data-nextjs-dialog-overlay],
+div[data-nextjs-portal],
+#nextjs-dev-indicator,
+[class*="nextjs-toast"] {
+  display: none !important;
+}
+
 /* Print Styles */
 @media print {
   * {

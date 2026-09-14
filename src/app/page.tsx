@@ -54,7 +54,7 @@ export default function Home() {
       {/* Main Workspace - 3 Column Layout */}
       <div className="flex-1 flex overflow-hidden">
         {/* Left Column - Prompt Panel */}
-        <div className="w-[380px] shrink-0 border-r border-brand flex flex-col">
+        <div className="w-[420px] shrink-0 border-r border-brand flex flex-col">
           <PromptPanel
             messages={messages}
             isGenerating={isGenerating}
