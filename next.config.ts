@@ -4,6 +4,9 @@ const nextConfig: NextConfig = {
   // Enable standalone output for better Cloudflare Workers compatibility
   output: "export",
   
+  // Disable dev indicator badge that overlaps bottom-left controls
+  devIndicators: false,
+  
   // Disable image optimization for static export
   images: {
     unoptimized: true,

@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef } from 'react';
 import { FileNode } from './CodeViewer';
+import { VibeTemplate } from './templates';
 
 interface ChatMessage {
   id: string;
@@ -2121,6 +2122,26 @@ document.addEventListener('DOMContentLoaded', function() {
     setUseLocalMock(prev => !prev);
   }, []);
 
+  const loadTemplate = useCallback((template: VibeTemplate) => {
+    setFiles(template.files);
+    const htmlFile = template.files.find(f => f.name === 'index.html');
+    setHtmlContent(htmlFile?.content || template.files[0]?.content || '');
+    
+    const userMessage: ChatMessage = {
+      id: Date.now().toString(),
+      type: 'user',
+      content: `Loaded starter: ${template.title}`,
+      timestamp: Date.now(),
+    };
+    const assistantMessage: ChatMessage = {
+      id: (Date.now() + 1).toString(),
+      type: 'assistant',
+      content: `✨ Scaffolded the **${template.title}** (${template.category}) project with ${template.files.length} ready-to-run files. You can view the code, test live interactions on the right, or prompt to customize colors, copy, and layout.`,
+      timestamp: Date.now() + 1,
+    };
+    setMessages(prev => [...prev, userMessage, assistantMessage]);
+  }, []);
+
   return {
     messages,
     files,
@@ -2128,6 +2149,7 @@ document.addEventListener('DOMContentLoaded', function() {
     isGenerating,
     generationStatus: generationStatus === 'idle' ? undefined : currentStatusMessage,
     sendMessage: generateProject,
+    loadTemplate,
     // New API integration features
     apiKey,
     setAPIKey,

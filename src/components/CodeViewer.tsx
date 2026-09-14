@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import JSZip from 'jszip';
 
 export interface FileNode {
   name: string;
@@ -18,6 +19,45 @@ interface CodeViewerProps {
 
 export function CodeViewer({ files, activeFile, onFileSelect }: CodeViewerProps) {
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
+
+  const downloadZip = async () => {
+    if (files.length === 0) {
+      alert('No files to download');
+      return;
+    }
+
+    const zip = new JSZip();
+    
+    const addFilesToZip = (nodes: FileNode[], basePath = '') => {
+      nodes.forEach((node) => {
+        const fullPath = basePath ? `${basePath}/${node.name}` : node.name;
+        
+        if (node.type === 'file' && node.content) {
+          zip.file(fullPath, node.content);
+        } else if (node.type === 'folder' && node.children) {
+          // Create folder and add its children
+          addFilesToZip(node.children, fullPath);
+        }
+      });
+    };
+    
+    addFilesToZip(files);
+    
+    try {
+      const content = await zip.generateAsync({ type: 'blob' });
+      const url = URL.createObjectURL(content);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'speaklife-project.zip';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error generating ZIP:', error);
+      alert('Error generating ZIP file');
+    }
+  };
 
   const toggleFolder = (folderPath: string) => {
     const newExpanded = new Set(expandedFolders);
@@ -117,8 +157,24 @@ export function CodeViewer({ files, activeFile, onFileSelect }: CodeViewerProps)
       {/* File Tree */}
       <div className="w-80 border-r border-brand flex flex-col">
         <div className="p-4 border-b border-brand">
-          <h3 className="text-lg font-semibold font-space-grotesk text-primary">Files</h3>
-          <p className="text-sm text-secondary mt-1">Generated project structure</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold font-space-grotesk text-primary">Files</h3>
+              <p className="text-sm text-secondary mt-1">Generated project structure</p>
+            </div>
+            {files.length > 0 && (
+              <button
+                onClick={downloadZip}
+                className="flex items-center gap-2 px-3 py-2 text-sm font-medium font-space-grotesk text-white bg-gradient-to-r from-purple-600 via-purple-500 to-cyan-400 hover:from-purple-700 hover:via-purple-600 hover:to-cyan-500 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                title="Download all files as ZIP"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Download ZIP
+              </button>
+            )}
+          </div>
         </div>
         
         <div className="flex-1 overflow-y-auto p-2">

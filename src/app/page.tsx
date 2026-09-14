@@ -18,6 +18,7 @@ export default function Home() {
     isGenerating,
     generationStatus,
     sendMessage,
+    loadTemplate,
   } = useVibeEngine();
 
   const getStatus = () => {
@@ -40,7 +41,7 @@ export default function Home() {
   });
 
   return (
-    <div className="h-screen bg-[#0B0F19] flex flex-col">
+    <div className="h-screen bg-[#0F0A17] flex flex-col font-space-grotesk">
       {/* Header */}
       <WorkspaceHeader
         selectedModel={selectedModel}
@@ -53,17 +54,18 @@ export default function Home() {
       {/* Main Workspace - 3 Column Layout */}
       <div className="flex-1 flex overflow-hidden">
         {/* Left Column - Prompt Panel */}
-        <div className="w-80 border-r border-slate-800 flex flex-col">
+        <div className="w-[380px] shrink-0 border-r border-brand flex flex-col">
           <PromptPanel
             messages={messages}
             isGenerating={isGenerating}
             onSendMessage={sendMessage}
+            onSelectTemplate={loadTemplate}
             generationStatus={generationStatus}
           />
         </div>
         
         {/* Center Column - Code Viewer */}
-        <div className="flex-1 border-r border-slate-800">
+        <div className="flex-1 min-w-[340px] border-r border-brand overflow-hidden">
           <CodeViewer
             files={files}
             activeFile={activeFile}
@@ -72,7 +74,7 @@ export default function Home() {
         </div>
         
         {/* Right Column - Live Preview */}
-        <div className="w-96">
+        <div className="flex-1 min-w-[420px] overflow-hidden">
           <LivePreview
             htmlContent={htmlContent}
             isLoading={isGenerating}
